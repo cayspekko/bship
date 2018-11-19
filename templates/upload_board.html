@@ -10,7 +10,7 @@
     </style>
 </head>
 <body>
-    <form action="/board/create" method="post">
+    <form action={{url_for("create_board")}} method="post">
         <textarea id=mytextarea name="board" maxlength="110" rows="11" cols="10"></textarea></br>
         <input type="submit" value="Submit">
     </form>
