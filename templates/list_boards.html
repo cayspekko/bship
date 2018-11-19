@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #mytextarea {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        {% for board in boards %}
+            <a href="board/{{board}}">{{board}}</a><br>
+        {% endfor %}
+    </div>
+</body>
+</html>
