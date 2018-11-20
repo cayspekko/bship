@@ -7,6 +7,7 @@
         .preformatted {
             font-family: monospace;
             white-space: pre;
+            font-size: 22px;
         }
     </style>
 </head>
@@ -15,15 +16,31 @@
 {{board}}
     </div>
     <div>
-        <form action={{url_for("attack_board", board_id=board_id)}} method="post" autocomplete="off">
-            Coord: <input type="text" name="coord" maxlength="3" autofocus> {% if message %}{{message}}{% endif %}</br>
-            <input type="submit" value="Submit">
-        </form>
-    </div>
-    <div>
-        {% if board_id != session["board"] %}
-            Your Board: <a href="{{session['board']}}/reveal">{{session['board']}}</a>
+        {% if not session.get("board") %}
+            <form action={{url_for("start_board", board_id=board_id)}} method="post" autocomplete="off">
+                Password for board: <input type="password" name="password"></br>
+                <input type="submit" value="Submit">
+            </form>
+        {% elif board_id != session["board"] %}
+            <form action={{url_for("attack_board", board_id=board_id)}} method="post" autocomplete="off">
+                Coord: <input type="text" name="coord" maxlength="3" size="3" autofocus> {% if message %}{{message}}{% endif %}</br>
+                <input type="submit" value="Submit">
+            </form>
+            Your Board: <a href="../{{session['board']}}/reveal">{{session['board']}}</a>
+        {% else %}
+            This is your board. <a href="reveal">Reveal ships</a>.<br>
+            {% if challenger %}
+                You are under attack by <a href={{url_for("start_board", board_id=challenger)}}>{{challenger}}</a>
+            {% else %}
+                You are not under attack. <a href={{url_for("list_boards")}}>Find someone!</a>
+            {% endif %}
+            <form action={{url_for("start_board", board_id=board_id)}} method="post" autocomplete="off">
+                Change/set password for board: <input type="password" name="password"></br>
+                <input type="submit" value="Submit">
+            </form>
+            <a href={{url_for('logout_board', board_id=session['board'])}}>Logout board</a>
         {% endif %}
+        <br><a href={{url_for("list_boards")}}>All boards</a>
     </div>
 </body>
 </html>

@@ -1,5 +1,7 @@
 import pickledb
 import uuid
+import random
+from passlib.hash import bcrypt_sha256
 
 bshipdb = None
 valid = {'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8', 'a9', 'a10', 'b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'b8',
@@ -17,6 +19,52 @@ def lazy(fn):
 
 def generate_board_url():
 	return uuid.uuid4().hex
+
+def generate_board():
+	ship_sizes = [5, 4, 3, 3, 2]
+	ships = []
+
+	def attempt_placement(ss):
+		this_ship = []
+		down = bool(random.randint(0,1))
+		x = random.randint(0, 9 if down else (10-ss))
+		y = random.randint(0, (10-ss) if down else 9)
+		for i in range(ss):
+			if down:
+				ship = [x, y+i]
+			else:
+				ship = [x+i, y]
+			if ship in ships:
+				return False
+			else:
+				this_ship.append(ship)
+		return this_ship
+
+	for ss in ship_sizes:
+		while True:
+			this_ship = attempt_placement(ss)
+			if this_ship:
+				ships.extend(this_ship)
+				break
+
+	print('-->', ships)
+	return ships
+
+
+def gen_board_file(ships):
+	board = []
+	for row in range(10):
+		for col in range(10):
+			if [row, col] in ships:
+				board.append('x')
+			else:
+				board.append('.')
+		board.append('\n')
+	return ''.join(board)
+
+
+def random_board_file():
+	return gen_board_file(generate_board())
 
 @lazy
 def load_board(ships):
@@ -68,11 +116,14 @@ def parse_coord(coord):
 
 @lazy
 def attack(board_url, my_board_id, unparsed_coord):
+	if not my_board_id:
+		raise ValueError("You don't have a board to attack with!")
+
 	if board_url == my_board_id:
-		raise ValueError("can't attack your own board")
+		raise ValueError("You can't attack your own board!")
 
 	if unparsed_coord not in valid:
-		raise ValueError(str(unparsed_coord) + " seems invalid")
+		raise ValueError(str(unparsed_coord) + " seems invalid!")
 
 	board = bshipdb.get(board_url)
 	if board.get('challenger') and board['challenger'] != my_board_id:
@@ -102,18 +153,20 @@ def attack(board_url, my_board_id, unparsed_coord):
 		message = "miss"
 		if c not in misses:
 			misses.append(c)
+	board['challenger'] = my_board_id
 	bshipdb.set(board_url, board)
 
 	# release my turn
 	my_board = bshipdb.get(my_board_id)
 	my_board['turn'] = board_url
+	my_board['challenger'] = board_url
 	bshipdb.set(my_board_id, my_board)
 
 	return message
 
 @lazy
-def attack_by_name(name, unparsed_coord):
-	bshipdb.get(name)
+def get_challenger(board_id):
+	return bshipdb.get(board_id).get('challenger')
 
 def parse_board(board):
 	ships = []
@@ -128,20 +181,39 @@ def parse_board(board):
 	return ships
 
 @lazy
-def list_boards():
-	return bshipdb.getall()
+def list_boards(filter=None):
+	return ((k, bshipdb.get(k).get('name')) for k in bshipdb.getall() if not filter or bshipdb.get(k).get('name', '').lower() == filter.lower())
+
+@lazy
+def set_attributes(board_url, name, password):
+	if not name and not password:
+		return
+	board = bshipdb.get(board_url)
+	if name:
+		board['name'] = name
+	if password:
+		board['password'] = bcrypt_sha256.hash(password)
+	bshipdb.set(board_url, board)
+
+@lazy
+def login_board(board_id, password):
+	board = bshipdb.get(board_id)
+	if not board.get('password'):
+		return False
+	return bcrypt_sha256.verify(password, board['password'])
 
 if __name__ == "__main__":
-	import sys
-	fname = sys.argv[1]
-	ships = []
-	with open(fname) as f:
-		for row in range(10):
-			l = f.readline()
-			for col in range(10):
-				if l[col] != '.':
-					ships.append([row, col])
-	board_url = load_board(ships)
-	print(board_url)
-	print_ships(board_url)
-	print_board(board_url)
+	# import sys
+	# fname = sys.argv[1]
+	# ships = []
+	# with open(fname) as f:
+	# 	for row in range(10):
+	# 		l = f.readline()
+	# 		for col in range(10):
+	# 			if l[col] != '.':
+	# 				ships.append([row, col])
+	# board_url = load_board(ships)
+	# print(board_url)
+	# print_ships(board_url)
+	# print_board(board_url)
+	print(gen_board_file(generate_board()))

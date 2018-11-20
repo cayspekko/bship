@@ -7,12 +7,16 @@
         .preformatted {
             font-family: monospace;
             white-space: pre;
+            font-size: 22px;
         }
     </style>
 </head>
 <body>
     <div class=preformatted>
 {{board}}
+    </div>
+    <div>
+        <a href={{url_for("start_board", board_id=board_id)}}>Ready!</a>
     </div>
 </body>
 </html>

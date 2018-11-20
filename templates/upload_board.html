@@ -6,13 +6,21 @@
     <style>
         #mytextarea {
             font-family: monospace;
+            font-size: 22px;
         }
     </style>
 </head>
 <body>
-    <form action={{url_for("create_board")}} method="post">
-        <textarea id=mytextarea name="board" maxlength="110" rows="11" cols="10"></textarea></br>
-        <input type="submit" value="Submit">
-    </form>
+    <div>
+        <a href={{url_for("upload_board", random=True)}}>Generate!</a>
+    </div>
+    <div>
+        <form action={{url_for("create_board")}} method="post">
+            <textarea id=mytextarea name="board" maxlength="110" rows="11" cols="10">{% if gen_board %}{{gen_board}}{% endif %}</textarea><br>
+            Name for board: <input type="text" name="name"><br>
+            Password for board: <input type="password" name="password"><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
 </body>
 </html>
