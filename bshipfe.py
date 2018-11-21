@@ -31,7 +31,7 @@ def start_board(board_id):
 def attack_board(board_id):
 	message = None
 	if request.method == "POST":
-		coord = request.form['coord']
+		coord = request.form['coord'][:3].lower()
 		try:
 			my_board_id = session["board"]
 			message = bshipbe.attack(board_id, my_board_id, coord)
@@ -82,3 +82,4 @@ def logout_board(board_id):
 
 if __name__ == "__main__":
 	app.run()
+	# next(count_coord())
