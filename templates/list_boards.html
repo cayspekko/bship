@@ -11,7 +11,7 @@
 </head>
 <body>
     <div><h1>Welcome to Battleship!</h1>
-    <a href={{url_for("upload_board", random=True)}}>Get Started</a> or chose a board below:
+        <p><a href={{url_for("upload_board", random=True)}}>Get Started</a> or choose a board below:</p>
     </div>
     <div>
         <form action={{url_for("list_boards")}} method="get">
@@ -20,9 +20,11 @@
         </form>
     </div>
     <div>
+        <p>
         {% for board_id, name in boards %}
             <a href="{{board_id}}">{{board_id}}</a>{% if name %} {{name}}{% endif%}{% if board_id == my_board %} <--Your board{% endif %}<br>
         {% endfor %}
+        </p>
     </div>
     <div>
         <p>
