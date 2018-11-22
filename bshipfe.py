@@ -4,6 +4,13 @@ app = Flask(__name__)
 app.config["DEBUG"] = True
 app.secret_key = "super secret key"
 
+
+def count_coord():
+	for i in range(100):
+		r = int(i/10)
+		c = i % 10
+		yield "%s%s" % (chr(ord('a') + r), c + 1)
+
 @app.route('/board/<board_id>/reveal/')
 def get_board(board_id):
 	if board_id == session.get('board'):
@@ -23,9 +30,30 @@ def start_board(board_id):
 	message = None
 	if request.args.get('message'):
 		message = request.args['message']
-	board = bshipbe.print_board(board_id)
+	# board = bshipbe.print_board(board_id)
+	hits, misses = bshipbe.get_attacks(board_id)
+	lines = ['  1 2 3 4 5 6 7 8 9 10']
+	cc = count_coord()
+	for row in range(10):
+		line = chr(ord('a') + row)
+		for col in range(10):
+			coord = next(cc)
+			if [row, col] in hits:
+				line += ' x'
+			elif [row, col] in misses:
+				line += ' o'
+			else:
+				if board_id != session.get('board'):
+					line += ' <a href=%s style="text-decoration: none">.</a>' % url_for("start_board", board_id=board_id, coord=coord)
+				else:
+					line += ' .'
+		lines.append(line)
+	board = '\n'.join(lines)
+	print('--> start_board:')
+	print(board)
 	challenger = bshipbe.get_challenger(board_id)
-	return render_template("start_board.html", board=board, board_id=board_id, challenger=challenger, message=message)
+	turn = bshipbe.get_turn(board_id)
+	return render_template("start_board.html", board=board, board_id=board_id, challenger=challenger, turn=turn, message=message)
 
 @app.route('/board/<board_id>/attack/', methods=['POST'])
 def attack_board(board_id):
