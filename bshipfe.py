@@ -49,8 +49,6 @@ def start_board(board_id):
 					line += ' .'
 		lines.append(line)
 	board = '\n'.join(lines)
-	print('--> start_board:')
-	print(board)
 	challenger = bshipbe.get_challenger(board_id)
 	turn = bshipbe.get_turn(board_id)
 	return render_template("start_board.html", board=board, board_id=board_id, challenger=challenger, turn=turn, message=message)
@@ -71,7 +69,6 @@ def attack_board(board_id):
 
 @app.route('/board/create/', methods=['PUT', 'POST'])
 def create_board():
-	print('-->', 'test')
 	if request.method == "POST":
 		board = request.form['board']
 		ships = bshipbe.parse_board(board)
@@ -82,7 +79,6 @@ def create_board():
 
 	board_url = bshipbe.load_board(ships)
 	session["board"] = board_url
-	print('-->', board_url)
 	bshipbe.set_attributes(board_url, name, password)
 	return redirect(url_for('get_board', board_id=board_url))
 

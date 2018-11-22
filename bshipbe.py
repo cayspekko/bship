@@ -47,7 +47,6 @@ def generate_board():
 				ships.extend(this_ship)
 				break
 
-	print('-->', ships)
 	return ships
 
 
@@ -90,15 +89,12 @@ def print_board(board_url):
 			else:
 				l += ' .'
 		lines.append(l)
-	print("\n".join(lines))
 	return "\n".join(lines)
 
 @lazy
 def print_ships(board_url):
-	print('-->board_url', board_url)
 	board = bshipdb.get(board_url)
 	ships = board['ships']
-	print('-->ships', ships)
 	lines = ["  1 2 3 4 5 6 7 8 9 10"]
 	for row in range(10):
 		l = chr(ord("a") + row)
@@ -108,11 +104,15 @@ def print_ships(board_url):
 			else:
 				l += ' .'
 		lines.append(l)
-	print("\n".join(lines))
 	return "\n".join(lines)
 
 def parse_coord(coord):
 	return [ord(coord[0]) - ord('a'), int(coord[1:]) - 1]
+
+@lazy
+def get_attacks(board_id):
+	board = bshipdb.get(board_id)
+	return board['hits'], board['misses']
 
 @lazy
 def attack(board_url, my_board_id, unparsed_coord):
@@ -127,7 +127,7 @@ def attack(board_url, my_board_id, unparsed_coord):
 
 	board = bshipdb.get(board_url)
 	if board.get('challenger') and board['challenger'] != my_board_id:
-		raise ValueError("This board %s is already under attack by someone else!" % board_url)
+		raise ValueError("This board is already under attack by %s!" % board['challenger'])
 
 	if board.get('turn') and board['turn'] != my_board_id:
 		raise ValueError("It's not your turn!")
@@ -142,14 +142,10 @@ def attack(board_url, my_board_id, unparsed_coord):
 	if c in ships:
 		if c not in hits:
 			hits.append(c)
-		print("HIT!")
 		message = "hit"
-		print('-->hit ships', hits, ships)
 		if all(ship in hits for ship in ships):
-			print("YOU WIN")
 			message = "win"
 	else:
-		print("MISS!")
 		message = "miss"
 		if c not in misses:
 			misses.append(c)
@@ -167,6 +163,10 @@ def attack(board_url, my_board_id, unparsed_coord):
 @lazy
 def get_challenger(board_id):
 	return bshipdb.get(board_id).get('challenger')
+
+@lazy
+def get_turn(board_id):
+	return bshipdb.get(board_id).get('turn')
 
 def parse_board(board):
 	ships = []
