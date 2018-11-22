@@ -126,6 +126,16 @@ def attack(board_url, my_board_id, unparsed_coord):
 		raise ValueError(str(unparsed_coord) + " seems invalid!")
 
 	board = bshipdb.get(board_url)
+	ships = board['ships']
+	hits = board['hits']
+	misses = board['misses']
+	c = parse_coord(unparsed_coord)
+
+	if c in misses:
+		raise ValueError("Already a miss!")
+	if c in hits:
+		raise ValueError("Already a hit!")
+
 	if board.get('challenger') and board['challenger'] != my_board_id:
 		raise ValueError("This board is already under attack by %s!" % board['challenger'])
 
@@ -133,11 +143,6 @@ def attack(board_url, my_board_id, unparsed_coord):
 		raise ValueError("It's not your turn!")
 	else:
 		board['turn'] = board_url
-
-	c = parse_coord(unparsed_coord)
-	ships = board['ships']
-	hits = board['hits']
-	misses = board['misses']
 
 	if c in ships:
 		if c not in hits:
