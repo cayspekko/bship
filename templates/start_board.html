@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta http-equiv="refresh" content="3; URL=".">
+    <title>Battleship!</title>
     <style>
         .preformatted {
             font-family: monospace;
@@ -13,34 +14,47 @@
 </head>
 <body>
     <div class=preformatted>
+{% autoescape false %}
 {{board}}
+{% endautoescape %}
     </div>
     <div>
         {% if not session.get("board") %}
             <form action={{url_for("start_board", board_id=board_id)}} method="post" autocomplete="off">
-                Password for board: <input type="password" name="password"></br>
+                Password for board: <input type="password" name="password">
                 <input type="submit" value="Submit">
             </form>
         {% elif board_id != session["board"] %}
             <form action={{url_for("attack_board", board_id=board_id)}} method="post" autocomplete="off">
-                Coord: <input type="text" name="coord" maxlength="3" size="3" autofocus> {% if message %}{{message}}{% endif %}</br>
-                <input type="submit" value="Submit">
+                Coord: <input type="text" name="coord" maxlength="3" size="3" {% if request.args.get("coord") %}value={{ request.args.get("coord") }}{% endif %} autofocus>
+                <input type="submit" value="Submit">{% if message %} {{message}}{% endif %}
             </form>
-            Your Board: <a href="../{{session['board']}}/reveal">{{session['board']}}</a>
+            {% if challenger %}
+                <p>
+                {% if challenger == session['board'] %}
+                    You are attacking this board. It is{% if turn != session['board'] %} NOT{% endif %} your turn!
+                {% else %}
+                    This board is already under attack by <a href={{url_for("start_board", board_id=challenger)}}>{{challenger}}</a>
+                {% endif %}
+                </p>
+            {% endif %}
+        <p>Your Board: <a href={{url_for("get_board", board_id=session["board"])}}>{{session['board']}}</a></p>
         {% else %}
-            This is your board. <a href="reveal">Reveal ships</a>.<br>
+            <p>This is your board. <a href="reveal">Reveal ships</a>.</div></p>
+            <p>
             {% if challenger %}
                 You are under attack by <a href={{url_for("start_board", board_id=challenger)}}>{{challenger}}</a>
             {% else %}
                 You are not under attack. <a href={{url_for("list_boards")}}>Find someone!</a>
             {% endif %}
+            </p>
             <form action={{url_for("start_board", board_id=board_id)}} method="post" autocomplete="off">
-                Change/set password for board: <input type="password" name="password"></br>
-                <input type="submit" value="Submit">
+                <p>Change/set password for board: <input type="password" name="password">
+                    <input type="submit" value="Submit"></p>
             </form>
-            <a href={{url_for('logout_board', board_id=session['board'])}}>Logout board</a>
+            <p><a href={{url_for('logout_board', board_id=session['board'])}}>Logout board</a></p>
         {% endif %}
-        <br><a href={{url_for("list_boards")}}>All boards</a>
+    <p><a href={{url_for("list_boards")}}>All boards</a></p>
     </div>
 </body>
 </html>
