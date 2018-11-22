@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="3; URL=".">
+    {% if request.args.get('auto') %}<meta http-equiv="refresh" content="3; URL=".">{% endif %}
     <title>Battleship!</title>
     <style>
         .preformatted {
@@ -52,7 +52,13 @@
                 <p>Change/set password for board: <input type="password" name="password">
                     <input type="submit" value="Submit"></p>
             </form>
-            <p><a href={{url_for('logout_board', board_id=session['board'])}}>Logout board</a></p>
+            <p><a href={{url_for('logout_board', board_id=session['board'])}}>Logout board</a> |
+                {%if request.args.get('auto') %}
+                <a href={{url_for("start_board", board_id=board_id)}}>Disable Auto Refresh</a>
+                {% else %}
+                <a href={{url_for("start_board", board_id=board_id, auto=True)}}>Enable Auto Refresh</a>
+                {% endif %}
+            </p>
         {% endif %}
     <p><a href={{url_for("list_boards")}}>All boards</a></p>
     </div>
