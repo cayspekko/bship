@@ -1,8 +1,7 @@
 from flask import Flask, request, redirect, url_for, render_template, flash, session
 import bshipbe
 app = Flask(__name__)
-app.config["DEBUG"] = True
-app.secret_key = "super secret key"
+app.config.from_pyfile('config.cfg')
 
 
 def count_coord():
