@@ -1,2 +1,2 @@
 # bship
-simple online battleship game I created for my son
+simple online battleship game I created for my son and nephew
